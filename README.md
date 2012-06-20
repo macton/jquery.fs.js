@@ -7,6 +7,8 @@ jquery.fs.js is a small jQuery plugin which wraps [filer.js](/ebidel/filer.js) [
 
 Except to allow for the above, the interface is passed through to filer.js to keep this plugin minimal.
 
+* jquery.fs.js - Mike Acton <macton@gmail.com>
+* filer.js     - Eric Bidelman <http://ericbidelman.tumblr.com/>
 
 Example of promise interface and (sequential) chaining:
 ```javascript
