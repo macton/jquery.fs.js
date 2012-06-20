@@ -50,7 +50,7 @@ See [tests.js](/macton/jquery.fs.js/blob/master/test/test.js) for more examples 
 an API which enables web applications to read and write files and folders to to
 its own sandboxed filesystem.
 
-Unlike other wrapper libraries [[1], [2]], filer.js takes a different approach
+Unlike other wrapper libraries, filer.js takes a different approach
 by reusing familiar UNIX commands (`cp`, `mv`, `ls`) for its API. The goal is to
 make the HTML5 API more approachable for developers that have done file I/O in
 other languages.
@@ -62,6 +62,9 @@ Supported Browsers
 * Chrome
 
 The HTML5 Filesystem API is only supported in Chrome. Therefore, the library only works in Chrome.
+
+Although the HTML5 Filesystem polyfill (also by Eric Bidelman) may work for you:
+<http://ericbidelman.tumblr.com/post/21649963613/idb-filesystem-js-bringing-the-html5-filesystem-api>
 
 Getting started
 =======
