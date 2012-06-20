@@ -1,11 +1,11 @@
 jquery.fs.js
 =======
 
-jquery.fs.js is a small jQuery plugin which wraps [filer.js](/ebidel/filer.js) [1] to provide:
+jquery.fs.js is a small jQuery plugin which wraps [fs.js](/ebidel/fs.js) [1] to provide:
 * Deferred/promise interface 
 * Chaining support
 
-Except to allow for the above, the interface is passed through to filer.js to keep this plugin minimal.
+Except to allow for the above, the interface is passed through to fs.js to keep this plugin minimal.
 
 
 Example of promise interface and (sequential) chaining:
@@ -25,13 +25,30 @@ Example of promise interface and (sequential) chaining:
     .fail( onError );
 ```
 
-See [tests.js](/macton/jquery.fs.js/blob/master/test/test.js) for more examples: 
+Same example, but using pipe to sequence promises manually:
+```javascript
+  fs.mkdir( folder_name )
+    .pipe( function() { return fs.mkdir( folder_name + '/1' ); } )
+    .pipe( function() { return fs.mkdir( folder_name + '/2' ); } )
+    .pipe( function() { return fs.mkdir( folder_name + '/3' ); } )
+    .pipe( function() { return fs.mkdir( folder_name + '/4' ); } )
+    .pipe( function() { return fs.mkdir( folder_name + '/5' ); } )
+    .pipe( function() { return fs.ls( folder_name ) } )
+    .done( function( entries ) { 
+      ok(entries.slice, 'returned entries is an array') // Verify we got an Array.
+      equal(entries.length, 5, 'Num root entries matches');
+      start();
+    })
+    .fail( onError );
+```
 
-[1]: filer.js is a [well tested](/ebidel/filer.js/tree/master/tests) wrapper library for the [HTML5 Filesystem API](http://dev.w3.org/2009/dap/file-system/pub/FileSystem/),
+See [tests.js](/macton/jquery.fs.js/blob/master/test/test.js) for more examples of each function, promises and chaining.
+
+[1]: fs.js is a [well tested](/ebidel/fs.js/tree/master/tests) wrapper library for the [HTML5 Filesystem API](http://dev.w3.org/2009/dap/file-system/pub/FileSystem/),
 an API which enables web applications to read and write files and folders to to
 its own sandboxed filesystem.
 
-Unlike other wrapper libraries [[1], [2]], filer.js takes a different approach
+Unlike other wrapper libraries [[1], [2]], fs.js takes a different approach
 by reusing familiar UNIX commands (`cp`, `mv`, `ls`) for its API. The goal is to
 make the HTML5 API more approachable for developers that have done file I/O in
 other languages.
@@ -47,7 +64,7 @@ The HTML5 Filesystem API is only supported in Chrome. Therefore, the library onl
 Getting started
 =======
 
-1. Required: [filer.js](/ebidel/filer.js)
+1. Required: [fs.js](/ebidel/fs.js)
 2. Required: [jQuery](http://jquery.com/)
 3. [Exploring the FileSystem APIs](http://www.html5rocks.com/tutorials/file/filesystem/)
 4. [The Synchronous FileSystem API for Workers](http://www.html5rocks.com/tutorials/file/filesystem-sync/)
@@ -116,7 +133,7 @@ ls()
 *List the contents of a directory.*
 
 The first arg is a path, filesystem URL, or DirectoryEntry to return the contents
-for. A promise is returned.
+for. A promise is returned. ls() can be chained sequentially.
 
 ```javascript
 // Pass a path.
@@ -141,7 +158,7 @@ fs.ls('path/to/some/dir/')
   .fail(onError);
 
 // Pass a filesystem: URL.
-var fsURL = filer.fs.root.toURL(); // e.g. 'filesystem:http://example.com/temporary/';
+var fsURL = fs.fs.root.toURL(); // e.g. 'filesystem:http://example.com/temporary/';
 fs.ls(fsURL, function(entries) {
   .done( function(entries) {
     // entries in the root folder.
@@ -149,7 +166,7 @@ fs.ls(fsURL, function(entries) {
   .fail(onError);
 
 // Pass a DirectorEntry.
-fs.ls(filer.fs.root, function(entries) {
+fs.ls(fs.fs.root, function(entries) {
   .done( function(entries) {
     // entries in the root directory.
   })
@@ -162,27 +179,27 @@ cd()
 *Allows you to change into another directory.*
 
 This is a convenience method. When using `cd()`, future operations are treated
-relative to the new directory. The success callback is passed the `DirectoryEntry`
-changed into.
+relative to the new directory. A promise is returned and success callback is passed the `DirectoryEntry`
+changed into. cd() can be chained sequentially.
 
 ```javascript
 // Passing a path.
-filer.cd('/path/to/folder', function(dirEntry) {
+fs.cd('/path/to/folder').then( function(dirEntry) {
   ...
 }, onError);
 
 // Passing a filesystem: URL.
-var fsURL = filer.fs.root.toURL(); // e.g. 'filesystem:http://example.com/temporary/';
-filer.cd(fsURL + 'myDir', function(dirEntry) {
+var fsURL = fs.root().toURL(); // e.g. 'filesystem:http://example.com/temporary/';
+fs.cd(fsURL + 'myDir').then( function(dirEntry) {
   // cwd becomes /myDir.
 }, onError);
 
 // Passing a DirectoryEntry.
-filer.cd(dirEntry, function(dirEntry2) {
+fs.cd(dirEntry).then( function(dirEntry2) {
   // dirEntry == dirEntry2
 }, onError);
 
-filer.cd('/path/to/folder'); // Both callbacks are optional.
+fs.cd('/path/to/folder'); // Both callbacks are optional.
 ```
 
 create()
@@ -191,22 +208,22 @@ create()
 *Creates an empty file.*
 
 `create()` creates an empty file in the current working directory. If you wish
-to write data to a file, see the `write()` method.
+to write data to a file, see the `write()` method. A promise is returned. create() can be chained sequentially.
 
 ```javascript
-filer.create('myFile.txt', false, function(fileEntry) {
+fs.create('myFile.txt', false).then( function(fileEntry) {
   // fileEntry.name == 'myFile.txt'
 }, onError);
 
-filer.create('/path/to/some/dir/myFile.txt', true, function(fileEntry) {
+fs.create('/path/to/some/dir/myFile.txt', true).then( function(fileEntry) {
   // fileEntry.fullPath == '/path/to/some/dir/myFile.txt'
 }, onError);
 
-filer.create('myFile.txt'); // Last 3 args are optional.
+fp.create('myFile.txt'); // Last 3 args are optional.
 ```
 
 The second (optional) argument is a boolean. Setting it to true throws an error
-if the file you're trying to create already exists.
+(i.e. deferred reject) if the file you're trying to create already exists.
 
 mkdir()
 -----
@@ -214,7 +231,7 @@ mkdir()
 *Creates an empty directory.*
 
 ```javascript
-filer.mkdir('myFolder', false, function(dirEntry) {
+fs.mkdir('myFolder', false).then( function(dirEntry) {
   // dirEntry.isDirectory == true
   // dirEntry.name == 'myFolder'
 }, onError);
@@ -227,14 +244,21 @@ For example, the following would create a new hierarchy ("music/genres/jazz") in
 the current folder:
 
 ```javascript
-filer.mkdir('music/genres/jazz/', false, function(dirEntry) {
+fs.mkdir('music/genres/jazz/', false).then( function(dirEntry) {
   // dirEntry.name == 'jazz' // Note: dirEntry is the last entry created.
 }, onError);
 ```
 
 The second argument to `mkdir()` a boolean indicating whether or not an error
-should be thrown if the directory already exists. The last two are a success
-callback and optional error callback.
+should be thrown if the directory already exists. 
+
+A promise is returned. mkdir() can be chained sequentially.
+
+```javascript
+fs.mkdir('music/genres/jazz/').then( function(dirEntry) {
+  // dirEntry.name == 'jazz' // second parameter option (default=false)
+}, onError);
+```
 
 rm()
 -----
@@ -242,22 +266,23 @@ rm()
 *Removes a file or directory.*
 
 If you're removing a directory, it is removed recursively. 
+A promise is returned. rm() can be chained sequentially.
 
 ```javascript
-filer.rm('myFile.txt', function() {
+fs.rm('myFile.txt').then( function() {
   ...
 }, onError);
 
-filer.rm('/path/to/some/someFile.txt', function() {
+fs.rm('/path/to/some/someFile.txt').then( function() {
   ...
 }, onError);
 
-var fsURL = filer.pathToFilesystemURL('/path/to/some/directory');
-filer.rm(fsURL, function() {
+var fsURL = fs.pathToFilesystemURL('/path/to/some/directory');
+fs.rm(fsURL).then( function() {
   ...
 }, onError);
 
-filer.rm(directorEntry, function() {
+fs.rm(directorEntry).then( function() {
   ...
 }, onError);
 ```
@@ -270,39 +295,41 @@ cp()
 The first argument to `cp()` is the source file/directory you wish to copy,
 followed by the destination folder for the source to be copied into.
 
+A promise is returned. cp() can be chained sequentially.
+
 Note: The src and dest arguments need to be the same type. For example, if pass
 a string path for the first argument, the destination cannot be a FileEntry.
 It must be a string path (or filesystem URL) as well.
 
 ```javascript
 // Pass string paths.
-filer.cp('myFile.txt', '/path/to/other/folder', null, function(entry) {
+fs.cp('myFile.txt', '/path/to/other/folder').then( function(entry) {
   // entry.fullPath == '/path/to/other/folder/myFile.txt'
 }, onError);
 
 // Pass filesystem URLs.
 var srcFsURL = 'filesystem:http://example.com/temporary/myDir';
 var destFsURL = 'filesystem:http://example.com/temporary/anotherDir';
-filer.cp(srcFsURL, destFsURL, null, function(entry) {
-  // filer.pathToFilesystemURL(entry.fullPath) == 'filesystem:http://example.com/temporary/anotherDir/myDir'
+fs.cp(srcFsURL, destFsURL).then( function(entry) {
+  // fs.pathToFilesystemURL(entry.fullPath) == 'filesystem:http://example.com/temporary/anotherDir/myDir'
 }, onError);
 
 // Pass Entry objects.
-filer.cp(srcEntry, destinationFolderEntry, null, function(entry) {
+fs.cp(srcEntry, destinationFolderEntry).then( function(entry) {
   ...
 }, onError);
 
 // Mixing string paths with filesystem URLs work too:
-filer.cp(srcEntry.toURL(), '/myDir', null, function(entry) {
+fs.cp(srcEntry.toURL(), '/myDir').then( function(entry) {
   ...
 }, onError);
 ```
 
-If you wish to copy the entry under a new name, specify the third newName argument:
+If you wish to copy the entry under a new name, specify the third (optional) newName argument:
 
 ```javascript
 // Copy myFile.txt to myFile2.txt in the current directory.
-filer.cp('myFile.txt', '.', 'myFile2.txt', function(entry) {
+fs.cp('myFile.txt', '.', 'myFile2.txt').then( function(entry) {
   // entry.name == 'myFile2.txt'
 }, onError);
 ```
@@ -316,35 +343,39 @@ The first argument to move is the source file or directory to move, the second
 is a destination directory, and the third is an optional new name for the file/folder
 when it is moved.
 
+A promise is returned. mv() can be chained sequentially.
+
 ```javascript
 // Pass string paths.
-filer.mv('path/to/myfile.mp3', '/another/dir', null, function(fileEntry) {
+fs.mv('path/to/myfile.mp3', '/another/dir').then( function(fileEntry) {
   // fileEntry.fullPath == '/another/dir/myfile.mp3'
 }, onError);
 
 // Pass a filesystem URL. This example renames file.txt to somethingElse.txt in
 // the same directory.
-filer.mv('filesystem:http://example.com/temporary/file.txt', '.', 'somethingElse.txt', function(fileEntry) {
+fs.mv('filesystem:http://example.com/temporary/file.txt', '.', 'somethingElse.txt').then( function(fileEntry) {
   // fileEntry.fullPath == '/somethingElse.txt'
 }, onError);
 
 // Pass a FileEntry or DirectoryEntry.
-filer.mv(folderEntry, destDirEntry, function(dirEntry) {
+fs.mv(folderEntry, destDirEntry).then( function(dirEntry) {
   // folder is moved into destDirEntry
 }, onError);
 
-filer.mv('myFile.txt', './someDir'); // The new name and both callbacks are optional.
+fs.mv('myFile.txt', './someDir'); // The new name and both callbacks are optional.
 
 ```
 
 open()
 -----
 
-*Returns a File object.*
+A promise is returned. open() can be chained sequentially.
+
+A File object is passed to the resolve function on success.
 
 ```javascript
 // Pass a path.
-filer.open('myFile.txt', function(file) {
+fs.open('myFile.txt').then( function(file) {
   // Use FileReader to read file.
   var reader = new FileReader();
   reader.onload = function(e) {
@@ -354,12 +385,12 @@ filer.open('myFile.txt', function(file) {
 }, onError);
 
 // Pass a filesystem URL.
-filer.open(fileEntry.toURL(), function(file) {
+fs.open(fileEntry.toURL()).then( function(file) {
   ...
 }, onError);
 
 // Pass a FileEntry.
-filer.open(fileEntry, function(file) {
+fs.open(fileEntry).then( function(file) {
   ...
 }, onError);
 ```
@@ -378,14 +409,19 @@ The second argument is an object with three properties:
 - `type`: optional mimetype of the content.
 - `append`: optional true if data should be appended to the file.
 
-The success callback for this method is passed the `FileEntry` for the file that
+The second argument can also be a function which returns an object as described above.
+- Note: This is one of the few feature specific to jquery.fs.js not provided by filer.js
+
+The resolve callback for this method is passed the `FileEntry` for the file that
 was written to and the `FileWriter` object used to do the writing.
+
+A promise is returned. write() can be chained sequentially.
 
 ```javascript
 // Write files from a file input.
 document.querySelector('input[type="file"]').onchange = function(e) {
   var file = e.target.files[0];
-  filer.write(file.name, {data: file, type: file.type}, function(fileEntry, fileWriter) {
+  fs.write(file.name, {data: file, type: file.type}).then( function(fileEntry, fileWriter) {
     ...
   }, onError);
 };
@@ -393,7 +429,7 @@ document.querySelector('input[type="file"]').onchange = function(e) {
 // Create a Blob and write it out.
 var bb = new BlobBuilder();
 bb.append('body { background: red; }');
-filer.write('styles.css', {data: bb.getBlob('text/css'), type: 'text/css'},
+fs.write('styles.css', {data: bb.getBlob('text/css'), type: 'text/css'}).then(
   function(fileEntry, fileWriter) {
     ...
   },
@@ -402,7 +438,7 @@ filer.write('styles.css', {data: bb.getBlob('text/css'), type: 'text/css'},
 
 // Create a typed array and write the ArrayBuffer.
 var uint8 = new Uint8Array([1,2,3,4,5]);
-filer.write(fileEntry, {data: uint8.buffer},
+fs.write(fileEntry, {data: uint8.buffer}).then(
   function(fileEntry, fileWriter) {
     ...
   },
@@ -410,7 +446,7 @@ filer.write(fileEntry, {data: uint8.buffer},
 );
 
 // Write string data.
-filer.write('path/to/file.txt', {data: '1234567890', type: 'text/plain'},
+fs.write('path/to/file.txt', {data: '1234567890', type: 'text/plain'}).then(
   function(fileEntry, fileWriter) {
     ...
   },
@@ -418,7 +454,17 @@ filer.write('path/to/file.txt', {data: '1234567890', type: 'text/plain'},
 );
 
 // Append to a file.
-filer.write('path/to/file.txt', {data: '1234567890', type: 'text/plain', append: true},
+fs.write('path/to/file.txt', {data: '1234567890', type: 'text/plain', append: true}).then(
+  function(fileEntry, fileWriter) {
+    ...
+  },
+  onError
+);
+
+// Create a Blob and write it out. Second parameter as function which returns description.
+var bb = new BlobBuilder();
+bb.append('body { background: red; }');
+fs.write('styles.css', function() { return {data: bb.getBlob('text/css'), type: 'text/css'}; }  ).then(
   function(fileEntry, fileWriter) {
     ...
   },
@@ -432,31 +478,33 @@ Utility methods
 The library contains a few utility methods to help you out.
 
 ```javascript
-Util.fileToObjectURL(Blob|File);
+$.fs.fileToObjectURL(Blob|File);
 
-Util.fileToArrayBuffer(blob, function(arrayBuffer) {
+// promise returned. cannot be sequentially chained.
+$.fs.fileToArrayBuffer(blob).then( function(arrayBuffer) {
   ...
-});
+}, onError);
 
-var blob = Util.arrayBufferToBlob((new Uint8Array(10)).buffer, opt_contentType);
+var blob = $.fs.arrayBufferToBlob((new Uint8Array(10)).buffer, opt_contentType);
 
-Util.arrayBufferToBinaryString((new Uint8Array(10)).buffer, function(binStr) {
+// promise returned. cannot be sequentially chained.
+$.fs.arrayBufferToBinaryString((new Uint8Array(10)).buffer).then( function(binStr) {
   ...
-});
+}, onError);
 
-Util.strToObjectURL(binaryStr, opt_contentType);
+$.fs.strToObjectURL(binaryStr, opt_contentType);
 
-Util.strToDataURL(binaryStr, contentType) // e.g. "data:application/pdf;base64,Ym9keSB7IG..."
+$.fs.strToDataURL(binaryStr, contentType) // e.g. "data:application/pdf;base64,Ym9keSB7IG..."
 // For plaintext (non-binary data):
-// Util.strToDataURL('body { background: green; }', 'text/css', false) == data:text/css,body { background: green; }
+// $.fs.strToDataURL('body { background: green; }', 'text/css', false) == data:text/css,body { background: green; }
 
-Util.arrayToBinaryString(bytes); // bytes is an Array, each varying from 0-255.
+$.fs.arrayToBinaryString(bytes); // bytes is an Array, each varying from 0-255.
 
-Util.getFileExtension('myfile.txt') == '.txt'
+$.fs.getFileExtension('myfile.txt') == '.txt'
 
-// Util.toArray(DOMList/NodeList) == Array
+// $.fs.toArray(DOMList/NodeList) == Array
 document.querySelector('input[type="file"]').onchange = function(e) {
-  Util.toArray(this.files).forEach(function(file, i) {
+  $.fs.toArray(this.files).forEach(function(file, i) {
     // blah blah blah.
   });
 };
