@@ -1,11 +1,11 @@
 jquery.fs.js
 =======
 
-jquery.fs.js is a small jQuery plugin which wraps [fs.js](/ebidel/fs.js) [1] to provide:
+jquery.fs.js is a small jQuery plugin which wraps [filer.js](/ebidel/filer.js) [1] to provide:
 * Deferred/promise interface 
 * Chaining support
 
-Except to allow for the above, the interface is passed through to fs.js to keep this plugin minimal.
+Except to allow for the above, the interface is passed through to filer.js to keep this plugin minimal.
 
 
 Example of promise interface and (sequential) chaining:
@@ -44,11 +44,11 @@ Same example, but using pipe to sequence promises manually:
 
 See [tests.js](/macton/jquery.fs.js/blob/master/test/test.js) for more examples of each function, promises and chaining.
 
-[1]: fs.js is a [well tested](/ebidel/fs.js/tree/master/tests) wrapper library for the [HTML5 Filesystem API](http://dev.w3.org/2009/dap/file-system/pub/FileSystem/),
+[1]: filer.js is a [well tested](/ebidel/filer.js/tree/master/tests) wrapper library for the [HTML5 Filesystem API](http://dev.w3.org/2009/dap/file-system/pub/FileSystem/),
 an API which enables web applications to read and write files and folders to to
 its own sandboxed filesystem.
 
-Unlike other wrapper libraries [[1], [2]], fs.js takes a different approach
+Unlike other wrapper libraries [[1], [2]], filer.js takes a different approach
 by reusing familiar UNIX commands (`cp`, `mv`, `ls`) for its API. The goal is to
 make the HTML5 API more approachable for developers that have done file I/O in
 other languages.
@@ -64,7 +64,7 @@ The HTML5 Filesystem API is only supported in Chrome. Therefore, the library onl
 Getting started
 =======
 
-1. Required: [fs.js](/ebidel/fs.js)
+1. Required: [filer.js](/ebidel/filer.js)
 2. Required: [jQuery](http://jquery.com/)
 3. [Exploring the FileSystem APIs](http://www.html5rocks.com/tutorials/file/filesystem/)
 4. [The Synchronous FileSystem API for Workers](http://www.html5rocks.com/tutorials/file/filesystem-sync/)
