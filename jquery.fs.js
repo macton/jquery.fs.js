@@ -28,6 +28,7 @@
 
       /* Helpers */
        
+      root:                function()       { return filer.fs.root; },
       pathToFilesystemURL: function( path ) { return filer.pathToFilesystemURL( path ); },       
 
       /* Utility methods */
