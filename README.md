@@ -1,14 +1,14 @@
 jquery.fs.js
 =======
 
-jquery.fs.js is a small jQuery plugin which wraps [filer.js](/ebidel/filer.js)[[1]] to provide:
+jquery.fs.js is a small jQuery plugin which wraps [filer.js](/ebidel/filer.js) [1] to provide:
 * Deferred/promise interface 
 * Chaining support
 
 Except to allow for the above, the interface is passed through to filer.js to keep this plugin minimal.
 
 
-Example of promise interface and chaining:
+Example of promise interface and (sequential) chaining:
 ```javascript
   fs.mkdir( folder_name )
     .mkdir( folder_name + '/1' )
@@ -25,7 +25,7 @@ Example of promise interface and chaining:
     .fail( onError );
 ```
 
-See tests for more examples.
+See [tests.js](/macton/jquery.fs.js/blob/master/test/test.js) for more examples: 
 
 [1]: filer.js is a [well tested](/ebidel/filer.js/tree/master/tests) wrapper library for the [HTML5 Filesystem API](http://dev.w3.org/2009/dap/file-system/pub/FileSystem/),
 an API which enables web applications to read and write files and folders to to
@@ -47,12 +47,11 @@ The HTML5 Filesystem API is only supported in Chrome. Therefore, the library onl
 Getting started
 =======
 
-See: 
-
 1. Required: [filer.js](/ebidel/filer.js)
-2. [Exploring the FileSystem APIs](http://www.html5rocks.com/tutorials/file/filesystem/)
-3. [The Synchronous FileSystem API for Workers](http://www.html5rocks.com/tutorials/file/filesystem-sync/)
-4. ["Using the HTML5 Filesystem API"](http://shop.oreilly.com/product/0636920021360.do),
+2. Required: [jQuery](http://jquery.com/)
+3. [Exploring the FileSystem APIs](http://www.html5rocks.com/tutorials/file/filesystem/)
+4. [The Synchronous FileSystem API for Workers](http://www.html5rocks.com/tutorials/file/filesystem-sync/)
+5. ["Using the HTML5 Filesystem API"](http://shop.oreilly.com/product/0636920021360.do),
 
 Usage
 -----
